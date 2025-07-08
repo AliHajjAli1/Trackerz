@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FiMoreVertical } from "react-icons/fi";
+import { FiEdit2, FiMoreHorizontal, FiTrash } from "react-icons/fi";
+import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
 import data from "../data/data.json";
 
 interface Item {
@@ -17,7 +18,26 @@ const Table: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortBy, setSortBy] = useState<"name" | "date">("date");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<SVGElement>) => {
+    setAnchorEl(event.currentTarget as unknown as HTMLElement);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+    handleClose();
+  };
+
+  const handleDeleteDialogClose = () => {
+    setOpenDeleteDialog(false);
+  };
 
   useEffect(() => {
     setItems(data);
@@ -33,12 +53,17 @@ const Table: React.FC = () => {
       if (sortBy === "name") {
         return a.itemName.localeCompare(b.itemName);
       } else {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       }
     });
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedItems = filteredItems.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
 
   const getStatusStyle = (status: string) => {
@@ -63,14 +88,16 @@ const Table: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
         <div className="flex flex-wrap gap-4 items-center">
           <div>
-            <label className="text-green-800 font-medium mr-2">Filter by Status:</label>
+            <label className="text-green-800 font-medium mr-2">
+              Filter by Status:
+            </label>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             >
               <option value="All">All</option>
               <option value="Pending">Pending</option>
@@ -88,7 +115,7 @@ const Table: React.FC = () => {
                 setSortBy(e.target.value as "name" | "date");
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             >
               <option value="date">Created At (Newest)</option>
               <option value="name">Item Name (A–Z)</option>
@@ -98,7 +125,7 @@ const Table: React.FC = () => {
 
         <div>
           <input
-            type="text"
+            type="search"
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -107,64 +134,74 @@ const Table: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-orange-200 shadow-md rounded-lg">
-          <thead className="bg-orange-100 text-green-800">
-            <tr>
-              <th className="py-3 px-4 border-b border-orange-200 text-left">Item Name</th>
-              <th className="py-3 px-4 border-b border-orange-200 text-left">Status</th>
-              <th className="py-3 px-4 border-b border-orange-200 text-left">Inquiries</th>
-              <th className="py-3 px-4 border-b border-orange-200 text-left">Created At</th>
-              <th className="py-3 px-4 border-b border-orange-200 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedItems.map((item, index) => (
-              <tr key={index} className="hover:bg-orange-50 text-orange-600 relative">
-                <td className="py-2 px-4 border-b border-orange-100 font-semibold">{item.itemName}</td>
-                <td className="py-2 px-4 border-b border-orange-100">
-                  <span className={`px-2 py-1 rounded-full text-sm font-medium ${getStatusStyle(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-2 px-4 border-b border-orange-100">{item.inquiries}</td>
-                <td className="py-2 px-4 border-b border-orange-100">{item.createdAt}</td>
-                <td className="py-2 px-4 border-b border-orange-100 relative">
-                  <button
-                    onClick={() => setOpenMenuIndex(openMenuIndex === index ? null : index)}
-                    className="text-2xl text-orange-600 hover:text-orange-800"
-                  >
-                    <FiMoreVertical />
-                  </button>
-                  {openMenuIndex === index && (
-                    <div className="absolute right-4 top-10 z-10 bg-white border border-orange-200 shadow-md rounded-md w-28">
-                      <button className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-100">Edit</button>
-                      <button className="block w-full text-left px-4 py-2 text-sm hover:bg-orange-100">Delete</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-
-            {paginatedItems.length < ITEMS_PER_PAGE &&
-              Array.from({ length: ITEMS_PER_PAGE - paginatedItems.length }).map((_, idx) => (
-                <tr key={`empty-${idx}`}>
-                  <td className="py-2 px-4 border-b border-orange-100">&nbsp;</td>
-                  <td className="py-2 px-4 border-b border-orange-100"></td>
-                  <td className="py-2 px-4 border-b border-orange-100"></td>
-                  <td className="py-2 px-4 border-b border-orange-100"></td>
-                  <td className="py-2 px-4 border-b border-orange-100"></td>
+      <div className="w-full overflow-x-auto">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden border border-orange-200 rounded-lg">
+            <table className="min-w-full divide-y divide-orange-200">
+              <thead className="bg-orange-100 text-green-800">
+                <tr>
+                  <th className="py-3 px-4 text-left">Item Name</th>
+                  <th className="py-3 px-4 text-left">Status</th>
+                  <th className="py-3 px-4 text-left">Inquiries</th>
+                  <th className="py-3 px-4 text-left">Created At</th>
                 </tr>
-              ))}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-orange-100">
+                {paginatedItems.map((item, index) => (
+                  <tr
+                    key={index}
+                    className="hover:bg-orange-50 text-orange-600"
+                  >
+                    <td className="py-2 px-4 font-semibold">{item.itemName}</td>
+                    <td className="py-2 px-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-sm whitespace-nowrap inline-block text-center font-medium ${getStatusStyle(
+                          item.status
+                        )}`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="py-2 px-4">{item.inquiries}</td>
+                    <td className="py-2 px-4">
+                      <div className="flex items-center justify-between">
+                        {item.createdAt}
+                        <FiMoreHorizontal
+                          className="text-green-800 cursor-pointer"
+                          onClick={handleClick}
+                        />
+                        <Menu
+                          id="fade-menu"
+                          anchorEl={anchorEl}
+                          open={open}
+                          onClose={handleClose}
+                          PaperProps={{
+                            sx: { boxShadow: "0px 4px 10px rgba(0,0,0,0.18)" },
+                          }}
+                        >
+                          <MenuItem onClick={handleClose}>
+                            Edit <FiEdit2 className="ml-6" />
+                          </MenuItem>
+                          <Divider />
+                          <MenuItem onClick={handleDeleteClick}>
+                            Delete <FiTrash className="ml-2 " />
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+      <div className="flex flex-row sm:flex-row justify-between items-center mt-4 gap-4">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-orange-600 text-white rounded disabled:opacity-50 hover:bg-orange-700 active:scale-95 transition"
+          className="px-4 py-2 bg-orange-600 text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-700 active:scale-95 transition"
         >
           Previous
         </button>
@@ -172,13 +209,35 @@ const Table: React.FC = () => {
           Page {currentPage} of {totalPages}
         </span>
         <button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-orange-600 text-white rounded disabled:opacity-50 hover:bg-orange-700 active:scale-95 transition"
+          className="px-4 py-2 bg-orange-600 text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-700 active:scale-95 transition"
         >
           Next
         </button>
       </div>
+
+      {openDeleteDialog && (
+        <Dialog open={openDeleteDialog} onClose={handleDeleteDialogClose}>
+          <div className="p-6">
+            <h2 className="text-lg font-semibold">Delete Item</h2>
+            <p>Are you sure you want to delete this item?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded mr-2 cursor-pointer hover:bg-gray-300 active:scale-95 transition"
+                onClick={handleDeleteDialogClose}
+              >
+                Cancel
+              </button>
+              <button className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 active:scale-95 transition">
+                Delete
+              </button>
+            </div>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 };

@@ -1,11 +1,15 @@
 import Navbar from "../components/navbar"
 import Table from "../components/table"
+import Footer from "../components/footer"
 
 const Home = () => {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <Table />
+      <div className="flex-grow">
+        <Table />
+      </div>
+      <Footer />
     </div>
   )
 }

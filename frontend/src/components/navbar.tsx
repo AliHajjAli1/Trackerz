@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Dialog } from "@mui/material";
+import { FiPlusCircle } from "react-icons/fi";
 
 const Navbar: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -7,7 +8,7 @@ const Navbar: React.FC = () => {
   const [status, setStatus] = useState("Pending");
 
   return (
-    <nav className="bg-orange-600 opacity-60 text-white px-6 py-4 shadow-md fixed top-0 w-full left-0">
+    <nav className="bg-[#f39f6b] text-white px-6 py-4 shadow-md fixed top-0 w-full left-0">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <h1 className="text-3xl font-bold">Trackerz</h1>
@@ -19,9 +20,9 @@ const Navbar: React.FC = () => {
         </div>
         <button
           onClick={() => setDialogOpen(true)}
-          className="text-orange-600 font-semibold px-4 py-2 bg-white rounded-lg shadow cursor-pointer hover:bg-orange-100 active:scale-95 transition-transform duration-100"
+          className="text-orange-600 font-semibold px-4 py-2 bg-white rounded-lg shadow cursor-pointer hover:bg-orange-100 active:scale-95 transition-transform duration-100 focus:outline-none"
         >
-          Add Item
+          Add Item <FiPlusCircle className="inline-block ml-2 font-semibold mb-0.5" />
         </button>
       </div>
       <Dialog
