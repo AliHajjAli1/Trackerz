@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { FiEdit2, FiMoreHorizontal, FiTrash } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiMoreHorizontal,
+  FiTrash,
+  FiXCircle,
+  FiCheckCircle,
+  FiClock,
+  FiPlayCircle,
+  FiHelpCircle,
+} from "react-icons/fi";
 import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
 import data from "../data/data.json";
 
@@ -18,16 +27,30 @@ const Table: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortBy, setSortBy] = useState<"name" | "date">("date");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<SVGElement>) => {
+  const gotoEditPage = () => {
+    if (selectedItemName) {
+      window.location.href = `/edit?itemName=${encodeURIComponent(
+        selectedItemName
+      )}`;
+    }
+  };
+
+  const handleClick = (
+    event: React.MouseEvent<SVGElement, MouseEvent>,
+    itemName: string
+  ) => {
     setAnchorEl(event.currentTarget as unknown as HTMLElement);
+    setSelectedItemName(itemName);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+    setSelectedItemName(null);
   };
 
   const handleDeleteClick = () => {
@@ -66,23 +89,33 @@ const Table: React.FC = () => {
   );
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
 
-  const getStatusStyle = (status: string) => {
+  const getIcon = (status: string) => {
     switch (status) {
       case "Approved":
-        return "bg-green-100 text-green-800";
+        return (
+          <FiCheckCircle className="inline-block ml-1 mb-0.5 text-green-600 bg-white rounded-full" />
+        );
       case "Pending":
-        return "bg-yellow-100 text-yellow-800";
+        return (
+          <FiPlayCircle className="inline-block ml-1 mb-0.5 text-yellow-600 bg-white rounded-full" />
+        );
       case "In Progress":
-        return "bg-blue-100 text-blue-800";
+        return (
+          <FiClock className="inline-block ml-1 mb-0.5 text-blue-600 bg-white rounded-full" />
+        );
       case "Rejected":
-        return "bg-red-100 text-red-800";
+        return (
+          <FiXCircle className="inline-block ml-1 mb-0.5 text-red-600 bg-white rounded-full border-gray-300" />
+        );
       default:
-        return "bg-gray-100 text-gray-800";
+        return (
+          <FiHelpCircle className="inline-block ml-1 mb-0.5 text-gray-600 bg-white rounded-full" />
+        );
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-24 px-4">
+    <div className="max-w-6xl mx-auto mt-23 px-4">
       <h1 className="text-2xl font-bold text-orange-600 mb-4">Items Table</h1>
 
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
@@ -154,12 +187,8 @@ const Table: React.FC = () => {
                   >
                     <td className="py-2 px-4 font-semibold">{item.itemName}</td>
                     <td className="py-2 px-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm whitespace-nowrap inline-block text-center font-medium ${getStatusStyle(
-                          item.status
-                        )}`}
-                      >
-                        {item.status}
+                      <span className="px-2 py-1 rounded-full text-sm whitespace-nowrap bg-gray-300 text-gray-800 inline-block text-center font-medium">
+                        {item.status} {getIcon(item.status)}
                       </span>
                     </td>
                     <td className="py-2 px-4">{item.inquiries}</td>
@@ -168,8 +197,9 @@ const Table: React.FC = () => {
                         {item.createdAt}
                         <FiMoreHorizontal
                           className="text-green-800 cursor-pointer"
-                          onClick={handleClick}
+                          onClick={(e) => handleClick(e, item.itemName)}
                         />
+
                         <Menu
                           id="fade-menu"
                           anchorEl={anchorEl}
@@ -179,7 +209,7 @@ const Table: React.FC = () => {
                             sx: { boxShadow: "0px 4px 10px rgba(0,0,0,0.18)" },
                           }}
                         >
-                          <MenuItem onClick={handleClose}>
+                          <MenuItem onClick={gotoEditPage}>
                             Edit <FiEdit2 className="ml-6" />
                           </MenuItem>
                           <Divider />

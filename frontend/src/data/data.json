@@ -1,5 +1,19 @@
 [
-  { "itemName": "Item A", "status": "Approved", "inquiries": 12, "createdAt": "2025-07-01" },
+  { "itemName": "Item A", "status": "Approved", "inquiries": 12, "createdAt": "2025-07-01", "inquiries-content":[
+    {
+      "title": "Amazing",
+      "date": "07-12-2025",
+      "description": "It is cheap and good product, I like it so much. However, I would like to see more features in the future. For example, I would like to see more options for customization and personalization. I would also like to see more options for integration with other products and services."
+    },{
+      "title": "Great Service",
+      "date": "07-13-2025",
+      "description": "The service was excellent, and the product exceeded my expectations. I would recommend it to anyone looking for quality."
+    }, {
+      "title": "Needs Improvement",
+      "date": "07-14-2025",
+      "description": "While the product is good, there are some areas that need improvement, such as the user interface and customer support."
+    }
+  ]},
   { "itemName": "Item B", "status": "Pending", "inquiries": 4, "createdAt": "2025-07-02" },
   { "itemName": "Item C", "status": "Rejected", "inquiries": 10, "createdAt": "2025-07-03" },
   { "itemName": "Item D", "status": "In Progress", "inquiries": 3, "createdAt": "2025-07-04" },

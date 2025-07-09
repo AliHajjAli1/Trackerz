@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Dialog } from "@mui/material";
 import { FiPlusCircle } from "react-icons/fi";
+import { Link } from "react-router-dom"; 
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  addAvailable?: boolean;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [status, setStatus] = useState("Pending");
@@ -10,19 +15,23 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-[#f39f6b] text-white px-6 py-4 shadow-md fixed top-0 w-full left-0">
       <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <h1 className="text-3xl font-bold">Trackerz</h1>
-          <img
-            src="/TrackerzLogo.png"
-            alt="Trackerz Logo"
-            className="h-8 sm:h-10 md:h-12 bg-white rounded-full shadow-lg"
-          />
-        </div>
+        <Link to="/" className="focus:outline-none">
+          <div className="flex items-center space-x-2">
+            <h1 className="text-3xl font-bold">Trackerz</h1>
+            <img
+              src="/TrackerzLogo.png"
+              alt="Trackerz Logo"
+              className="h-8 sm:h-10 md:h-12 bg-white rounded-full shadow-lg"
+            />
+          </div>
+        </Link>
         <button
           onClick={() => setDialogOpen(true)}
+          style={{ display: addAvailable ? "block" : "none" }}
           className="text-orange-600 font-semibold px-4 py-2 bg-white rounded-lg shadow cursor-pointer hover:bg-orange-100 active:scale-95 transition-transform duration-100 focus:outline-none"
         >
-          Add Item <FiPlusCircle className="inline-block ml-2 font-semibold mb-0.5" />
+          Add Item{" "}
+          <FiPlusCircle className="inline-block ml-2 font-semibold mb-0.5" />
         </button>
       </div>
       <Dialog
@@ -64,10 +73,18 @@ const Navbar: React.FC = () => {
               className="border border-gray-300 text-green-800 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
               required
             >
-              <option className="text-green-800" value="Pending">Pending</option>
-              <option className="text-green-800" value="In Progress">In Progress</option>
-              <option className="text-green-800" value="Approved">Approved</option>
-              <option className="text-green-800" value="Rejected">Rejected</option>
+              <option className="text-green-800" value="Pending">
+                Pending
+              </option>
+              <option className="text-green-800" value="In Progress">
+                In Progress
+              </option>
+              <option className="text-green-800" value="Approved">
+                Approved
+              </option>
+              <option className="text-green-800" value="Rejected">
+                Rejected
+              </option>
             </select>
 
             <div className="flex justify-end space-x-3 pt-2">

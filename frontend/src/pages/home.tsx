@@ -5,7 +5,7 @@ import Footer from "../components/footer"
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar addAvailable={true} />
       <div className="flex-grow">
         <Table />
       </div>
