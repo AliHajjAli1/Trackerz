@@ -20,6 +20,10 @@ const Edit = () => {
   status: string;
   inquiries: number;
   createdAt: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  value: string;
   "inquiries-content"?: Inquiry[];
   }
 
@@ -51,12 +55,14 @@ const Edit = () => {
   }, [itemNameFromUrl]);
 
   const [name, setName] = useState(itemNameFromUrl || "");
-  const [status, setStatus] = useState(data.find((item) => item.itemName === itemNameFromUrl)?.status || "Pending");
+  const [status, setStatus] = useState(data.find((item) => item.itemName === itemNameFromUrl)?.status || "New");
 
   const submitInquiry = (e: React.FormEvent) => {
     e.preventDefault();
     setSnackbarOpen(true);
     setDialogOpen(false);
+    setTitle("");
+    setDescription("");
   };
 
   return (
@@ -65,9 +71,11 @@ const Edit = () => {
       <main className="flex-grow flex flex-col space-y-4 items-center justify-center">
         <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 w-2/5 mt-30">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold text-green-800">Edit Item</h1>
+            <h1 className="text-2xl font-semibold text-green-800">
+              View/Edit Item
+            </h1>
             <p className="text-sm text-gray-500">
-              Update the details below to edit the item.
+              See/Update the details below to edit the item.
             </p>
           </div>
 
@@ -93,12 +101,33 @@ const Edit = () => {
               className="border border-gray-300 text-green-800 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
               required
             >
-              <option value="Pending">Pending</option>
+              <option value="New">New</option>
               <option value="In Progress">In Progress</option>
               <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
+              <option value="Closed">Closed</option>
+              <option value="Awaiting PreChecks">Awaiting PreChecks</option>
+              <option value="Site Issues">Site Issues</option>
+              <option value="Additional Documents Required">
+                Additional Documents Required
+              </option>
+              <option value="New Quotes Required">New Quotes Required</option>
+              <option value="Completed">Completed</option>
             </select>
-
+            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+              Location: {selectedItem ? selectedItem.location : "N/A"}
+            </label>
+            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+              Open Date: {new Date(selectedItem?.createdAt || "").toLocaleDateString("en-UK")}
+            </label>
+            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+              Start Date: {new Date(selectedItem?.startDate || "").toLocaleDateString("en-UK")}
+            </label>
+            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+              End Date: {new Date(selectedItem?.endDate || "").toLocaleDateString("en-UK")}
+            </label>
+            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+              Value: {selectedItem ? selectedItem.value : "N/A"}
+            </label>
             <div className="flex justify-center space-x-16 pt-2">
               <button
                 type="button"
@@ -130,7 +159,11 @@ const Edit = () => {
                     <ul className="space-y-4">
                       {selectedItem["inquiries-content"].map((inquiry, i) => (
                         <li key={i}>
-                          <Inquiry title={inquiry.title} date={inquiry.date} description={inquiry.description} />
+                          <Inquiry
+                            title={inquiry.title}
+                            date={inquiry.date}
+                            description={inquiry.description}
+                          />
                         </li>
                       ))}
                     </ul>

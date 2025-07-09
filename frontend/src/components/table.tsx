@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  FiEdit2,
-  FiMoreHorizontal,
-  FiTrash,
-  FiXCircle,
-  FiCheckCircle,
-  FiClock,
-  FiPlayCircle,
-  FiHelpCircle,
-} from "react-icons/fi";
+import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle,
+   FiClock, FiPlayCircle, FiHelpCircle, FiAlertCircle, FiSmile, FiTarget, FiPieChart, FiMinusCircle } from "react-icons/fi";
 import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
 import data from "../data/data.json";
 
@@ -95,7 +87,7 @@ const Table: React.FC = () => {
         return (
           <FiCheckCircle className="inline-block ml-1 mb-0.5 text-green-600 bg-white rounded-full" />
         );
-      case "Pending":
+      case "New":
         return (
           <FiPlayCircle className="inline-block ml-1 mb-0.5 text-yellow-600 bg-white rounded-full" />
         );
@@ -103,9 +95,29 @@ const Table: React.FC = () => {
         return (
           <FiClock className="inline-block ml-1 mb-0.5 text-blue-600 bg-white rounded-full" />
         );
-      case "Rejected":
+      case "Closed":
         return (
           <FiXCircle className="inline-block ml-1 mb-0.5 text-red-600 bg-white rounded-full border-gray-300" />
+        );
+      case "Completed":
+        return (
+          <FiSmile  className="inline-block ml-1 mb-0.5 text-pink-400 bg-white rounded-full" />
+        );
+      case "New Quotes Required":
+        return (
+          <FiAlertCircle  className="inline-block ml-1 mb-0.5 text-purple-600 bg-white rounded-full" />
+        );
+      case "Awaiting PreChecks":
+        return (
+          <FiTarget  className="inline-block ml-1 mb-0.5 text-gray-600 bg-white rounded-full" />
+        );
+      case "Site Issues":
+        return (
+          <FiMinusCircle   className="inline-block ml-1 mb-0.5 text-amber-800 bg-white rounded-full" />
+        );
+      case "Additional Documents Required":
+        return (
+          <FiPieChart  className="inline-block ml-1 mb-0.5 text-sky-400 bg-white rounded-full" />
         );
       default:
         return (
@@ -133,10 +145,15 @@ const Table: React.FC = () => {
               className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             >
               <option value="All">All</option>
-              <option value="Pending">Pending</option>
+              <option value="New">New</option>
               <option value="In Progress">In Progress</option>
               <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
+              <option value="Closed">Closed</option>
+              <option value="Awaiting PreChecks">Awaiting PreChecks</option>
+              <option value="Site Issues">Site Issues</option>
+              <option value="Additional Documents Required">Additional Documents Required</option>
+              <option value="New Quotes Required">New Quotes Required</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
 

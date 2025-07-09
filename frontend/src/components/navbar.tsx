@@ -10,7 +10,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
-  const [status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("New");
 
   return (
     <nav className="bg-[#f39f6b] text-white px-6 py-4 shadow-md fixed top-0 w-full left-0">
@@ -73,8 +73,8 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
               className="border border-gray-300 text-green-800 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
               required
             >
-              <option className="text-green-800" value="Pending">
-                Pending
+              <option className="text-green-800" value="New">
+                New
               </option>
               <option className="text-green-800" value="In Progress">
                 In Progress
@@ -82,8 +82,23 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
               <option className="text-green-800" value="Approved">
                 Approved
               </option>
-              <option className="text-green-800" value="Rejected">
-                Rejected
+              <option className="text-green-800" value="Closed">
+                Closed
+              </option>
+              <option className="text-green-800" value="Completed">
+                Completed
+              </option>
+              <option className="text-green-800" value="Site Issues">
+                Site Issues
+              </option>
+              <option className="text-green-800" value="Awaiting PreChecks">
+                Awaiting PreChecks
+              </option>
+              <option className="text-green-800" value="Additional Documents Required">
+                Additional Documents Required
+              </option>
+              <option className="text-green-800" value="New Quotes Required">
+                New Quotes Required
               </option>
             </select>
 
