@@ -3,6 +3,7 @@ import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle,
    FiClock, FiPlayCircle, FiHelpCircle, FiAlertCircle, FiSmile, FiTarget, FiPieChart, FiMinusCircle } from "react-icons/fi";
 import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
 import data from "../data/data.json";
+import { fetchApplications, type Application } from "../api/apps";
 
 interface Item {
   itemName: string;
@@ -23,6 +24,31 @@ const Table: React.FC = () => {
   const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const open = Boolean(anchorEl);
+  const [applications, setApplications] = useState<Application[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadApplications = async () => {
+      try {
+        const response = await fetchApplications();
+        if (response && response.data) {
+          setApplications(response.data);
+        } else {
+          setApplications([]);
+        }
+      } catch (err) {
+        setError('Failed to fetch applications');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, []);
+
+  console.log("Applications:", applications);
 
   const gotoEditPage = () => {
     if (selectedItemName) {
