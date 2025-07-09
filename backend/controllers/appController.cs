@@ -40,4 +40,17 @@ public class AppController : ControllerBase
         await _context.SaveChangesAsync();
         return NoContent();
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteApplication(int id)
+    {
+        var application = await _context.Application.FindAsync(id);
+        if (application == null)
+        {
+            return NotFound();
+        }
+
+        _context.Application.Remove(application);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
 }
