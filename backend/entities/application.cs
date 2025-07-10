@@ -28,5 +28,4 @@ public class Application
 
     [Column("ProjectLocation")]
     public string? Location { get; set; }
-
 }

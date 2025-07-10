@@ -1,40 +1,18 @@
 import { useEffect, useState } from "react";
 import { FiPlus, FiX, FiXCircle } from "react-icons/fi";
-import { Dialog, CircularProgress, Snackbar } from "@mui/material";
+import { Dialog, CircularProgress, Snackbar, Skeleton  } from "@mui/material";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Inquiry from "../components/inquiry";
 import { fetchApplications, type Application } from "../api/apps";
 import { fetchInquiries, type Inquiries } from "../api/inquiries";
+
 const Edit = () => {
-
-  interface Inquiry {
-    title: string;
-    date: string;
-    description: string;
-  }
-
-  interface Item {
-    itemName: string;
-    status: string;
-    inquiries: number;
-    createdAt: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    value: string;
-    "inquiries-content"?: Inquiry[];
-  }
-
-  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [items, setItems] = useState<Application[]>([]);
   const [selectedItem, setSelectedItem] = useState<Application | null>(null);
-  const [itemName, setItemName] = useState("");
-
   const queryParams = new URLSearchParams(window.location.search);
   const itemNameFromUrl = queryParams.get("itemName") || "";
   console.log("Item Name from URL:", itemNameFromUrl);
@@ -42,6 +20,10 @@ const Edit = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = "Trackerz - Edit";
+  }, []);
 
   useEffect(() => {
     const loadApplications = async () => {
@@ -64,15 +46,6 @@ const Edit = () => {
 
   console.log("Applications:", applications);
   console.log("Error", error);
-
-  useEffect(() => {
-    setItemName(itemNameFromUrl);
-  }, [itemNameFromUrl]);
-
-
-  useEffect(() => {
-    setItems(applications)
-  }, [applications]);
 
   useEffect(() => {
     const found = applications.find((item) => item.name === itemNameFromUrl);
@@ -273,16 +246,34 @@ const Edit = () => {
             <p className="text-sm text-gray-500">
               View and add inquiries for this application.
             </p>
-            {relatedInquiries.length > 0 ? (
-              <ul className="space-y-4 mt-4">
-                {relatedInquiries.map((inq) => (
-                  <ul key={inq.id}>
-                    <Inquiry title={inq.subject} description={inq.inquiryText} date={new Date(inq.askedDt).toLocaleDateString("en-UK")} />
-                  </ul>
-                ))}
-              </ul>
+            {inquiriesLoading ? (
+              <div className="mt-4 space-y-4">
+                <Skeleton variant="text" width={"50%"} height={"4%"} />
+                <Skeleton variant="text" width={"40%"} height={"3%"} />
+                <Skeleton variant="text" width={"70%"} height={"5%"} />
+              </div>
             ) : (
-              <p className="mt-4">No inquiries found for this application.</p>
+              <>
+                {relatedInquiries.length > 0 ? (
+                  <ul className="space-y-4 mt-4">
+                    {relatedInquiries.map((inq) => (
+                      <li key={inq.id}>
+                        <Inquiry
+                          title={inq.subject}
+                          description={inq.inquiryText}
+                          date={new Date(inq.askedDt).toLocaleDateString(
+                            "en-UK"
+                          )}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-4">
+                    No inquiries found for this application.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>

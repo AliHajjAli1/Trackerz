@@ -21,9 +21,21 @@ public class AppController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddApplication([FromBody] Application application)
+    public async Task<IActionResult> AddApplication([FromBody] AppCreateDto application)
     {
-        _context.Application.Add(application);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var newApp = new Application
+        {
+            Name = application.Name,
+            Status = application.Status,
+            Location = application.Location,
+            Value = application.Value,
+            CreatedAt = application.CreateDt,
+            StatusId = application.getStatusId(application.Status),
+        };
+
+        await _context.Application.AddAsync(newApp);
         await _context.SaveChangesAsync();
         return Ok(application);
     }
@@ -53,4 +65,6 @@ public class AppController : ControllerBase
         await _context.SaveChangesAsync();
         return NoContent();
     }
+
+    
 }
