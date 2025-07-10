@@ -16,15 +16,15 @@ const Edit = () => {
   }
 
   interface Item {
-  itemName: string;
-  status: string;
-  inquiries: number;
-  createdAt: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  value: string;
-  "inquiries-content"?: Inquiry[];
+    itemName: string;
+    status: string;
+    inquiries: number;
+    createdAt: string;
+    location: string;
+    startDate: string;
+    endDate: string;
+    value: string;
+    "inquiries-content"?: Inquiry[];
   }
 
   

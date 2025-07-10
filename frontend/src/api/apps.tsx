@@ -1,18 +1,18 @@
 import axios from 'axios';
 
 export type Application = {
-  id: number;
-  name: string;
-  status: string;
+  name: string | null;
+  statusId: number | null;
+  value: number | null;
+  createdAt: string | null;
 };
 
 export const fetchApplications = async () => {
     try {
         const data = await axios.get<Application[]>(
-            `http://localhost:5077/api/applications`
+            `http://localhost:5077/api/App`
         );
         console.log("Fetched applications:", data);
-        console.log("URL:",process.env.REACT_APP_API_URL);
         return data;
     }
     catch(error : any) {

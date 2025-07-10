@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle,
    FiClock, FiPlayCircle, FiHelpCircle, FiAlertCircle, FiSmile, FiTarget, FiPieChart, FiMinusCircle } from "react-icons/fi";
 import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
-import data from "../data/data.json";
 import { fetchApplications, type Application } from "../api/apps";
 
 interface Item {
-  itemName: string;
-  status: string;
-  inquiries: number;
-  createdAt: string;
+  itemName: string | null;
+  status: string | null;
+  value: number | null;
+  createdAt: Date | null;
 }
 
 const ITEMS_PER_PAGE = 8;
@@ -25,7 +24,6 @@ const Table: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const open = Boolean(anchorEl);
   const [applications, setApplications] = useState<Application[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +47,7 @@ const Table: React.FC = () => {
   }, []);
 
   console.log("Applications:", applications);
+  console.log("Error", error);
 
   const gotoEditPage = () => {
     if (selectedItemName) {
@@ -80,25 +79,70 @@ const Table: React.FC = () => {
     setOpenDeleteDialog(false);
   };
 
-  useEffect(() => {
-    setItems(data);
-  }, []);
+  const getStatus = (statusId: number): string => {
+    switch (statusId) {
+      case 1:
+        return "New";
+      case 2:
+        return "Awaiting PreChecks";
+      case 3:
+        return "Approved";
+      case 4:
+        return "In Progress";
+      case 5:
+        return "Completed";
+      case 6:
+        return "Site Issues";
+      case 7:
+        return "Additional Documents Required";
+      case 8:
+        return "New Quotes Required";
+      case 9:
+        return "Closed";
+      default:
+        return "Unknown";
+    }
+  };
 
-  const filteredItems = items
-    .filter(
-      (item) =>
+  useEffect(() => {
+    setItems(applications.map((app) => ({
+      itemName: app.name,
+      status: getStatus(app.statusId || 1),
+      value: app.value,
+      createdAt: app.createdAt ? new Date(app.createdAt) : null,
+    })));
+  }, [applications]);
+
+  const filteredItems = useMemo(() => {
+    return items
+      .filter(item =>
         (statusFilter === "All" || item.status === statusFilter) &&
-        item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortBy === "name") {
-        return a.itemName.localeCompare(b.itemName);
-      } else {
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      }
-    });
+        item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortBy === "name") {
+          const aName = a.itemName || "";
+          const bName = b.itemName || "";
+
+          const aStartsWithLetter = /^[a-zA-Z]/.test(aName);
+          const bStartsWithLetter = /^[a-zA-Z]/.test(bName);
+
+          if (aStartsWithLetter && !bStartsWithLetter) {
+            return -1;
+          }
+          if (!aStartsWithLetter && bStartsWithLetter) {
+            return 1;
+          }
+          
+          return aName.localeCompare(bName, 'en', { numeric: true, sensitivity: 'base' });
+
+        } else {
+          if (!a.createdAt) return 1;
+          if (!b.createdAt) return -1;
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+      });
+  }, [items, statusFilter, searchTerm, sortBy]);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedItems = filteredItems.slice(
@@ -152,6 +196,14 @@ const Table: React.FC = () => {
     }
   };
 
+  if (loading) {
+      return <div className="text-center p-8">Loading applications...</div>
+  }
+
+  if (error) {
+      return <div className="text-center p-8 text-red-500">{error}</div>
+  }
+
   return (
     <div className="max-w-6xl mx-auto mt-23 px-4">
       <h1 className="text-2xl font-bold text-orange-600 mb-4">Items Table</h1>
@@ -193,8 +245,8 @@ const Table: React.FC = () => {
               }}
               className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             >
-              <option value="date">Created At (Newest)</option>
-              <option value="name">Item Name (A–Z)</option>
+              <option value="date"> Creation Date (Newest)</option>
+              <option value="name">Name (A–Z)</option>
             </select>
           </div>
         </div>
@@ -204,7 +256,10 @@ const Table: React.FC = () => {
             type="search"
             placeholder="Search by name..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+            }}
             className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
@@ -216,10 +271,10 @@ const Table: React.FC = () => {
             <table className="min-w-full divide-y divide-orange-200">
               <thead className="bg-orange-100 text-green-800">
                 <tr>
-                  <th className="py-3 px-4 text-left">Item Name</th>
+                  <th className="py-3 px-4 text-left">Name</th>
                   <th className="py-3 px-4 text-left">Status</th>
-                  <th className="py-3 px-4 text-left">Inquiries</th>
-                  <th className="py-3 px-4 text-left">Created At</th>
+                  <th className="py-3 px-4 text-left">Value</th>
+                  <th className="py-3 px-4 text-left">Date</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-orange-100">
@@ -231,16 +286,16 @@ const Table: React.FC = () => {
                     <td className="py-2 px-4 font-semibold">{item.itemName}</td>
                     <td className="py-2 px-4">
                       <span className="px-2 py-1 rounded-full text-sm whitespace-nowrap bg-gray-300 text-gray-800 inline-block text-center font-medium">
-                        {item.status} {getIcon(item.status)}
+                        {item.status} {getIcon(item.status ? item.status : "")}
                       </span>
                     </td>
-                    <td className="py-2 px-4">{item.inquiries}</td>
+                    <td className="py-2 px-4">{item.value ? item.value : 0}</td>
                     <td className="py-2 px-4">
                       <div className="flex items-center justify-between">
-                        {item.createdAt}
+                        {item.createdAt ? item.createdAt.toLocaleDateString("en-UK") : ""}
                         <FiMoreHorizontal
                           className="text-green-800 cursor-pointer"
-                          onClick={(e) => handleClick(e, item.itemName)}
+                          onClick={(e) => handleClick(e, item.itemName || "")}
                         />
 
                         <Menu
@@ -279,7 +334,7 @@ const Table: React.FC = () => {
           Previous
         </button>
         <span className="text-green-800 font-medium">
-          Page {currentPage} of {totalPages}
+          Page {currentPage} of {totalPages===0? 1 : totalPages}
         </span>
         <button
           onClick={() =>

@@ -26,4 +26,7 @@ public class Application
     [Column("StatusId")]
     public int? StatusId { get; set; }
 
+    [Column("ProjectLocation")]
+    public string? Location { get; set; }
+
 }
