@@ -1,10 +1,20 @@
 import axios from 'axios';
 
+interface Inquiry {
+    title: string;
+    date: string;
+    description: string;
+  }
+
 export type Application = {
   name: string | null;
   statusId: number | null;
   value: number | null;
   createdAt: string | null;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  "inquiries-content"?: Inquiry[];
 };
 
 export const fetchApplications = async () => {

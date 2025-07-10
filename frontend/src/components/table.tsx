@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle,
    FiClock, FiPlayCircle, FiHelpCircle, FiAlertCircle, FiSmile, FiTarget, FiPieChart, FiMinusCircle } from "react-icons/fi";
-import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
+import { Menu, MenuItem, Divider, Dialog, CircularProgress } from "@mui/material";
 import { fetchApplications, type Application } from "../api/apps";
 
 interface Item {
@@ -197,18 +197,20 @@ const Table: React.FC = () => {
   };
 
   if (loading) {
-      return <div className="text-center p-8">Loading applications...</div>
+      return <div className="text-center"><CircularProgress color="success"/></div>
   }
 
   if (error) {
-      return <div className="text-center p-8 text-red-500">{error}</div>
+      return <div className="flex flex-col text-center p-8"><FiXCircle className="text-red-500"/> Error! Try refreshing the page.</div>
   }
 
   return (
-    <div className="max-w-6xl mx-auto mt-23 px-4">
-      <h1 className="text-2xl font-bold text-orange-600 mb-4">Items Table</h1>
+    <div className="w-full md:w-2/3 mt-23 px-4">
 
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+      <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Items Table</h1>
+
+      <div className="flex flex-col sm:flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 w-full">
+
         <div className="flex flex-wrap gap-4 items-center">
           <div>
             <label className="text-green-800 font-medium mr-2">
@@ -268,7 +270,7 @@ const Table: React.FC = () => {
       <div className="w-full overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden border border-orange-200 rounded-lg">
-            <table className="min-w-full divide-y divide-orange-200">
+            <table className="min-w-full divide-y divide-orange-200 table-auto">
               <thead className="bg-orange-100 text-green-800">
                 <tr>
                   <th className="py-3 px-4 text-left">Name</th>
@@ -289,15 +291,14 @@ const Table: React.FC = () => {
                         {item.status} {getIcon(item.status ? item.status : "")}
                       </span>
                     </td>
-                    <td className="py-2 px-4">{item.value ? item.value : 0}</td>
+                    <td className="py-2 px-4 whitespace-nowrap">{item.value ? item.value : 0} $</td>
                     <td className="py-2 px-4">
                       <div className="flex items-center justify-between">
                         {item.createdAt ? item.createdAt.toLocaleDateString("en-UK") : ""}
                         <FiMoreHorizontal
-                          className="text-green-800 cursor-pointer"
+                          className=" ml-3 text-green-800 cursor-pointer"
                           onClick={(e) => handleClick(e, item.itemName || "")}
                         />
-
                         <Menu
                           id="fade-menu"
                           anchorEl={anchorEl}
@@ -329,7 +330,7 @@ const Table: React.FC = () => {
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-orange-600 text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-700 active:scale-95 transition"
+          className="px-4 py-2 bg-[#f39f6b] text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-600 active:scale-95 transition"
         >
           Previous
         </button>
@@ -341,7 +342,7 @@ const Table: React.FC = () => {
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-orange-600 text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-700 active:scale-95 transition"
+          className="px-4 py-2 bg-[#f39f6b] text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-600 active:scale-95 transition"
         >
           Next
         </button>

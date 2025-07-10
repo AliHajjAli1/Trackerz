@@ -11,6 +11,61 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [status, setStatus] = useState("New");
+  const [value, setValue] = useState("");
+  const [location, setLocation] = useState("");
+
+  const getStatusId = (status: string): number => {
+    switch (status) {
+      case "New":
+        return 1;
+      case "Awaiting PreChecks":
+        return 2;
+      case "Approved":
+        return 3;
+      case "In Progress":
+        return 4;
+      case "Completed":
+        return 5;
+      case "Site Issues":
+        return 6;
+      case "Additional Documents Required":
+        return 7;
+      case "New Quotes Required":
+        return 8;
+      case "Closed":
+        return 9;
+      default:
+        return 1;
+    }
+  };
+
+  const onAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    interface NewItem {
+      name: string;
+      status: string;
+      value: string;
+      location: string;
+      Date: string;
+      statusId: number;
+    }
+
+    const newItem: NewItem = {
+      name,
+      status,
+      value,
+      location,
+      Date: new Date().toISOString().split("T")[0] + "T00:00:00",
+      statusId: getStatusId(status),
+    };
+
+    console.log("Item Created:", newItem);
+    setDialogOpen(false);
+    setName("");
+    setStatus("New");
+    setValue("");
+    setLocation("");
+  };
 
   return (
     <nav className="bg-[#f39f6b] text-white px-6 py-4 shadow-md fixed top-0 w-full left-0">
@@ -51,11 +106,7 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
           </div>
 
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              console.log("Item Created:", { name, status });
-              setDialogOpen(false);
-            }}
+            onSubmit={onAddSubmit}
             className="flex flex-col space-y-4"
           >
             <input
@@ -63,6 +114,24 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
               placeholder="Enter name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Enter value"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Enter location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
               required
             />

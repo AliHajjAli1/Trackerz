@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiX } from "react-icons/fi";
-import { Dialog } from "@mui/material";
+import { FiPlus, FiX, FiXCircle } from "react-icons/fi";
+import { Dialog, CircularProgress, Snackbar } from "@mui/material";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import Snackbar from '@mui/material/Snackbar';
 import Inquiry from "../components/inquiry";
-import data from "../data/data.json";
+import { fetchApplications, type Application } from "../api/apps";
 
 const Edit = () => {
 
-   interface Inquiry {
+  interface Inquiry {
     title: string;
     date: string;
     description: string;
@@ -32,13 +31,39 @@ const Edit = () => {
   const [description, setDescription] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [items, setItems] = useState<Item[]>([]);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [items, setItems] = useState<Application[]>([]);
+  const [selectedItem, setSelectedItem] = useState<Application | null>(null);
   const [itemName, setItemName] = useState("");
 
   const queryParams = new URLSearchParams(window.location.search);
   const itemNameFromUrl = queryParams.get("itemName") || "";
   console.log("Item Name from URL:", itemNameFromUrl);
+
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadApplications = async () => {
+      try {
+        const response = await fetchApplications();
+        if (response && response.data) {
+          setApplications(response.data);
+        } else {
+          setApplications([]);
+        }
+      } catch (err) {
+        setError("Failed to fetch applications");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, []);
+
+  console.log("Applications:", applications);
+  console.log("Error", error);
 
   useEffect(() => {
     setItemName(itemNameFromUrl);
@@ -46,16 +71,44 @@ const Edit = () => {
 
 
   useEffect(() => {
-    setItems(data);
-  }, []);
+    setItems(applications)
+  }, [applications]);
 
   useEffect(() => {
-    const found = data.find((item) => item.itemName === itemNameFromUrl);
+    const found = applications.find((item) => item.name === itemNameFromUrl);
     setSelectedItem(found || null);
-  }, [itemNameFromUrl]);
+  }, [itemNameFromUrl, applications]);
+
+  const getStatus = (statusId: number): string => {
+    switch (statusId) {
+      case 1:
+        return "New";
+      case 2:
+        return "Awaiting PreChecks";
+      case 3:
+        return "Approved";
+      case 4:
+        return "In Progress";
+      case 5:
+        return "Completed";
+      case 6:
+        return "Site Issues";
+      case 7:
+        return "Additional Documents Required";
+      case 8:
+        return "New Quotes Required";
+      case 9:
+        return "Closed";
+      default:
+        return "Unknown";
+    }
+  };
 
   const [name, setName] = useState(itemNameFromUrl || "");
-  const [status, setStatus] = useState(data.find((item) => item.itemName === itemNameFromUrl)?.status || "New");
+  const [status, setStatus] = useState(getStatus(selectedItem?.statusId || 1));
+  useEffect(() => {
+    setStatus(getStatus(selectedItem?.statusId || 1));
+  }, [selectedItem]);
 
   const submitInquiry = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,11 +118,38 @@ const Edit = () => {
     setDescription("");
   };
 
+  if (loading) {
+        return (
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow flex items-center justify-center">
+              <CircularProgress color="success" />
+            </main>
+            <Footer />
+          </div>
+        );
+  }
+
+  if (error) {
+        return (
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow flex items-center justify-center">
+              <div className="flex flex-col text-center p-8">
+                <FiXCircle className="text-red-500" /> 
+                Error! Try refreshing the page.
+              </div>
+            </main>
+            <Footer />
+          </div>
+        );
+    }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow flex flex-col space-y-4 items-center justify-center">
-        <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 w-2/5 mt-30">
+        <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 md:w-2/5 mt-30">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-green-800">
               View/Edit Item
@@ -145,7 +225,7 @@ const Edit = () => {
             </div>
           </form>
         </div>
-        <div className="bg-white rounded-lg border-gray-200 border mt-10 p-6 space-y-4 w-2/5">
+        <div className="bg-white rounded-lg border-gray-200 border mt-10 p-6 space-y-4 md:w-2/5">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-green-800">Inquiries</h1>
             <p className="text-sm text-gray-500">
