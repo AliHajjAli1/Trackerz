@@ -5,7 +5,7 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Inquiry from "../components/inquiry";
 import { fetchApplications, type Application } from "../api/apps";
-
+import { fetchInquiries, type Inquiries } from "../api/inquiries";
 const Edit = () => {
 
   interface Inquiry {
@@ -118,6 +118,39 @@ const Edit = () => {
     setDescription("");
   };
 
+  const [inquiries, setInquiries] = useState<Inquiries[]>([]);
+  const [inquiriesLoading, setInquiriesLoading] = useState(true);
+  const [inquiriesError, setInquiriesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadInquiries = async () => {
+      try {
+        const response = await fetchInquiries();
+        if (response && response.data) {
+          setInquiries(response.data);
+        } else {
+          setInquiries([]);
+        }
+      } catch (err) {
+        setInquiriesError("Failed to fetch inquiries");
+      } finally {
+        setInquiriesLoading(false);
+      }
+    };
+
+    loadInquiries();
+  }, []);
+
+  console.log("Inquiries:", inquiries);
+  console.log("Inquiries Error", inquiriesError);
+
+  const relatedInquiries = inquiries.filter(
+    (inq) => inq.applicationId === selectedItem?.id
+  );
+
+  console.log("Related Inquiries:", relatedInquiries);
+  console.log("selected", selectedItem);
+
   if (loading) {
         return (
           <div className="min-h-screen flex flex-col">
@@ -197,13 +230,22 @@ const Edit = () => {
               Location: {selectedItem ? selectedItem.location : "N/A"}
             </label>
             <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
-              Open Date: {new Date(selectedItem?.createdAt || "").toLocaleDateString("en-UK")}
+              Open Date:{" "}
+              {new Date(selectedItem?.createdAt || "").toLocaleDateString(
+                "en-UK"
+              )}
             </label>
             <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
-              Start Date: {new Date(selectedItem?.startDate || "").toLocaleDateString("en-UK")}
+              Start Date:{" "}
+              {new Date(selectedItem?.startDate || "").toLocaleDateString(
+                "en-UK"
+              )}
             </label>
             <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
-              End Date: {new Date(selectedItem?.endDate || "").toLocaleDateString("en-UK")}
+              End Date:{" "}
+              {new Date(selectedItem?.endDate || "").toLocaleDateString(
+                "en-UK"
+              )}
             </label>
             <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
               Value: {selectedItem ? selectedItem.value : "N/A"}
@@ -231,33 +273,16 @@ const Edit = () => {
             <p className="text-sm text-gray-500">
               View and add inquiries for this application.
             </p>
-            {selectedItem ? (
-              <div className="mt-4">
-                <div className="mt-3">
-                  {selectedItem["inquiries-content"] &&
-                  selectedItem["inquiries-content"].length > 0 ? (
-                    <ul className="space-y-4">
-                      {selectedItem["inquiries-content"].map((inquiry, i) => (
-                        <li key={i}>
-                          <Inquiry
-                            title={inquiry.title}
-                            date={inquiry.date}
-                            description={inquiry.description}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="italic text-gray-500">
-                      No inquiries available.
-                    </p>
-                  )}
-                </div>
-              </div>
+            {relatedInquiries.length > 0 ? (
+              <ul className="space-y-4 mt-4">
+                {relatedInquiries.map((inq) => (
+                  <ul key={inq.id}>
+                    <Inquiry title={inq.subject} description={inq.inquiryText} date={new Date(inq.askedDt).toLocaleDateString("en-UK")} />
+                  </ul>
+                ))}
+              </ul>
             ) : (
-              <p className="text-center text-gray-500 italic mt-4">
-                No Inquiries yet!
-              </p>
+              <p className="mt-4">No inquiries found for this application.</p>
             )}
           </div>
         </div>

@@ -9,7 +9,8 @@ namespace backend.Data
         {
         }
         public DbSet<Application> Application { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public DbSet<Inquiry> Inquiries { get; set; }
+         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
         }

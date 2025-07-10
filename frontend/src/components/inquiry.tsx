@@ -10,7 +10,7 @@ const Inquiry = ({title, date, description}: InquiryProps) => {
       <h1 className="text-xl font-semibold text-gray-800 justify-self-start">
         {title}
       </h1>
-      <p className="text-sm text-orange-600 justify-self-start">{date}</p>
+      <p className="text-sm text-[#f39f6b] justify-self-start">{date}</p>
       <p className="text-md text-gray-500 justify-self-start text-justify">
         {description}
       </p>

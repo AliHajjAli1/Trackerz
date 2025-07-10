@@ -7,6 +7,7 @@ interface Inquiry {
   }
 
 export type Application = {
+  id: number;
   name: string | null;
   statusId: number | null;
   value: number | null;
