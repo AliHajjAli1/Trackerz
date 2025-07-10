@@ -4,7 +4,7 @@ interface Inquiry {
     title: string;
     date: string;
     description: string;
-  }
+}
 
 export type Application = {
   id: number;

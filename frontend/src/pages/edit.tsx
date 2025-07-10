@@ -155,7 +155,7 @@ const Edit = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow flex flex-col space-y-4 items-center justify-center">
-        <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 md:w-2/5 mt-30">
+        <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 w-9/10 md:w-2/5 mt-30">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-green-800">
               View/Edit Item
@@ -240,7 +240,7 @@ const Edit = () => {
             </div>
           </form>
         </div>
-        <div className="bg-white rounded-lg border-gray-200 border mt-10 p-6 space-y-4 md:w-2/5">
+        <div className="bg-white rounded-lg border-gray-200 border mt-10 p-6 space-y-4 w-9/10 md:w-2/5">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-green-800">Inquiries</h1>
             <p className="text-sm text-gray-500">
