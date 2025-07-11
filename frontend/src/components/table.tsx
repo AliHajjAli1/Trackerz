@@ -3,6 +3,7 @@ import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle, FiX,
    FiClock, FiPlayCircle, FiHelpCircle, FiAlertCircle, FiSmile, FiTarget, FiPieChart, FiMinusCircle } from "react-icons/fi";
 import { Menu, MenuItem, Divider, Dialog, Snackbar } from "@mui/material";
 import { deleteApplication, type Application } from "../api/apps";
+import { getStatus } from "../functions/getStatus";
 
 interface Item {
   itemName: string | null;
@@ -68,31 +69,6 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
 
   const handleDeleteDialogClose = () => {
     setOpenDeleteDialog(false);
-  };
-
-  const getStatus = (statusId: number): string => {
-    switch (statusId) {
-      case 1:
-        return "New";
-      case 2:
-        return "Awaiting PreChecks";
-      case 3:
-        return "Approved";
-      case 4:
-        return "In Progress";
-      case 5:
-        return "Completed";
-      case 6:
-        return "Site Issues";
-      case 7:
-        return "Additional Documents Required";
-      case 8:
-        return "New Quotes Required";
-      case 9:
-        return "Closed";
-      default:
-        return "Unknown";
-    }
   };
 
   useEffect(() => {
@@ -190,8 +166,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
   return (
     <div className="w-full md:w-2/3 mt-23 px-4">
       <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Items Table</h1>
-
-      <div className="flex flex-col sm:flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 w-full">
+      <div className="flex flex-col sm:flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 w-full">
         <div className="flex flex-wrap gap-4 items-center">
           <div>
             <label className="text-green-800 font-medium mr-2">

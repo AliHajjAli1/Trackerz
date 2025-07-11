@@ -3,6 +3,7 @@ import { Dialog, Snackbar } from "@mui/material";
 import { FiPlusCircle, FiX } from "react-icons/fi";
 import { Link } from "react-router-dom"; 
 import { addApplication, type Application } from "../api/apps";
+import { getStatusId } from "../functions/getStatus";
 
 interface NavbarProps {
   addAvailable?: boolean;
@@ -17,29 +18,14 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [location, setLocation] = useState("");
 
-  const getStatusId = (status: string): number => {
-    switch (status) {
-      case "New":
-        return 1;
-      case "Awaiting PreChecks":
-        return 2;
-      case "Approved":
-        return 3;
-      case "In Progress":
-        return 4;
-      case "Completed":
-        return 5;
-      case "Site Issues":
-        return 6;
-      case "Additional Documents Required":
-        return 7;
-      case "New Quotes Required":
-        return 8;
-      case "Closed":
-        return 9;
-      default:
-        return 1;
-    }
+  
+
+  const cancelAdd = () => {
+    setDialogOpen(false);
+    setName("");
+    setLocation("");
+    setStatus("New");
+    setValue(null);
   };
 
   const onAddSubmit = async(e: React.FormEvent) => {
@@ -183,7 +169,7 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
             <div className="flex justify-end space-x-3 pt-2">
               <button
                 type="button"
-                onClick={() => setDialogOpen(false)}
+                onClick={cancelAdd}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 active:scale-95 transition duration-150"
               >
                 Cancel

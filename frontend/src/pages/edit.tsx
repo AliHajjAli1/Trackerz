@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { FiPlus, FiX, FiXCircle } from "react-icons/fi";
-import { Dialog, CircularProgress, Snackbar, Skeleton  } from "@mui/material";
+import { Dialog, CircularProgress, Snackbar, Skeleton } from "@mui/material";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Inquiry from "../components/inquiry";
-import { fetchApplications, type Application } from "../api/apps";
+import { fetchApplications, updateApplication, type Application } from "../api/apps";
 import { fetchInquiries, type Inquiries } from "../api/inquiries";
+import { getStatus, getStatusId } from "../functions/getStatus";
 
 const Edit = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackBarText, setSnackBarText] = useState("");
   const [selectedItem, setSelectedItem] = useState<Application | null>(null);
   const queryParams = new URLSearchParams(window.location.search);
   const itemNameFromUrl = queryParams.get("itemName") || "";
@@ -52,31 +54,6 @@ const Edit = () => {
     setSelectedItem(found || null);
   }, [itemNameFromUrl, applications]);
 
-  const getStatus = (statusId: number): string => {
-    switch (statusId) {
-      case 1:
-        return "New";
-      case 2:
-        return "Awaiting PreChecks";
-      case 3:
-        return "Approved";
-      case 4:
-        return "In Progress";
-      case 5:
-        return "Completed";
-      case 6:
-        return "Site Issues";
-      case 7:
-        return "Additional Documents Required";
-      case 8:
-        return "New Quotes Required";
-      case 9:
-        return "Closed";
-      default:
-        return "Unknown";
-    }
-  };
-
   const [name, setName] = useState(itemNameFromUrl || "");
   const [status, setStatus] = useState(getStatus(selectedItem?.statusId || 1));
   useEffect(() => {
@@ -85,6 +62,7 @@ const Edit = () => {
 
   const submitInquiry = (e: React.FormEvent) => {
     e.preventDefault();
+    setSnackBarText("Inquiry added successfully!")
     setSnackbarOpen(true);
     setDialogOpen(false);
     setTitle("");
@@ -124,36 +102,64 @@ const Edit = () => {
   console.log("Related Inquiries:", relatedInquiries);
   console.log("selected", selectedItem);
 
+  const submitEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const edittedApp: Application = {
+      id: selectedItem?.id || 0,
+      name,
+      value: selectedItem?.value || null,
+      statusId: getStatusId(status),
+      status,
+      location: selectedItem?.location || null,
+      startDate: selectedItem?.startDate || null,
+      endDate: selectedItem?.endDate || null,
+      createdAt: selectedItem?.createdAt || null
+    }
+
+    try {
+      await updateApplication(edittedApp);
+      console.log("Updated app: ", edittedApp);
+      setSnackBarText("App updated successfully!");
+      setSnackbarOpen(true);
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   if (loading) {
-        return (
-          <div className="min-h-screen flex flex-col">
-            <Navbar onAdd={() => {}} />
-            <main className="flex-grow flex items-center justify-center">
-              <CircularProgress color="success" />
-            </main>
-            <Footer />
-          </div>
-        );
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar onAdd={() => {}} />
+        <main className="flex-grow flex items-center justify-center">
+          <CircularProgress color="success" />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   if (error) {
-        return (
-          <div className="min-h-screen flex flex-col">
-            <Navbar onAdd={() => {}}/>
-            <main className="flex-grow flex items-center justify-center">
-              <div className="flex flex-col text-center p-8">
-                <FiXCircle className="text-red-500" /> 
-                Error! Try refreshing the page.
-              </div>
-            </main>
-            <Footer />
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar onAdd={() => {}} />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="flex flex-col text-center p-8">
+            <FiXCircle className="text-red-500" />
+            Error! Try refreshing the page.
           </div>
-        );
-    }
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar onAdd={() => {}}/>
+      <Navbar onAdd={() => {}} />
       <main className="flex-grow flex flex-col space-y-4 items-center justify-center">
         <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 w-9/10 md:w-2/5 mt-30">
           <div className="text-center">
@@ -166,10 +172,7 @@ const Edit = () => {
           </div>
 
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              console.log("Item Created:", { name, status });
-            }}
+            onSubmit={submitEdit}
             className="flex flex-col space-y-4"
           >
             <input
@@ -227,13 +230,13 @@ const Edit = () => {
               <button
                 type="button"
                 onClick={() => (window.location.href = "/")}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 active:scale-95 transition duration-150"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded cursor-pointer hover:bg-gray-300 active:scale-95 transition duration-150"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-300 active:scale-95 transition duration-150"
+                className="px-4 py-2 bg-orange-600 text-white cursor-pointer rounded hover:bg-orange-300 active:scale-95 transition duration-150"
               >
                 Save
               </button>
@@ -343,7 +346,7 @@ const Edit = () => {
         autoHideDuration={1500}
         onClose={() => setSnackbarOpen(false)}
         message={
-          <span style={{ color: "#fff" }}>Inquiry added successfully!</span>
+          <span style={{ color: "#fff" }}>{snackBarText}</span>
         }
         ContentProps={{
           sx: { backgroundColor: "rgb(9, 130, 54)" },
