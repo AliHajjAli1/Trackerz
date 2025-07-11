@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle,
+import { FiEdit2, FiMoreHorizontal, FiTrash, FiXCircle, FiCheckCircle, FiX,
    FiClock, FiPlayCircle, FiHelpCircle, FiAlertCircle, FiSmile, FiTarget, FiPieChart, FiMinusCircle } from "react-icons/fi";
-import { Menu, MenuItem, Divider, Dialog, CircularProgress } from "@mui/material";
-import { fetchApplications, type Application } from "../api/apps";
+import { Menu, MenuItem, Divider, Dialog, Snackbar } from "@mui/material";
+import { deleteApplication, type Application } from "../api/apps";
 
 interface Item {
   itemName: string | null;
@@ -11,9 +11,14 @@ interface Item {
   createdAt: Date | null;
 }
 
+type Props = {
+  applications: Application[];
+  onDelete: (id: number) => void; 
+};
+
 const ITEMS_PER_PAGE = 8;
 
-const Table: React.FC = () => {
+const Table: React.FC<Props> = ({ applications, onDelete }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [items, setItems] = useState<Item[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -22,38 +27,25 @@ const Table: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const open = Boolean(anchorEl);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadApplications = async () => {
-      try {
-        const response = await fetchApplications();
-        if (response && response.data) {
-          setApplications(response.data);
-        } else {
-          setApplications([]);
-        }
-      } catch (err) {
-        setError('Failed to fetch applications');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadApplications();
-  }, []);
-
-  console.log("Applications:", applications);
-  console.log("Error", error);
 
   const gotoEditPage = () => {
     if (selectedItemName) {
       window.location.href = `/edit?itemName=${encodeURIComponent(
         selectedItemName
       )}`;
+    }
+  };
+
+  const handleDeleteApp = async () => {
+    if (selectedItemName) {
+      let id = applications.find(app => app.name === selectedItemName)?.id || 0;
+      await deleteApplication(id);
+      onDelete(id);
+      handleClose();
+      setOpenDeleteDialog(false);
+      setSnackbarOpen(true);
     }
   };
 
@@ -72,7 +64,6 @@ const Table: React.FC = () => {
 
   const handleDeleteClick = () => {
     setOpenDeleteDialog(true);
-    handleClose();
   };
 
   const handleDeleteDialogClose = () => {
@@ -196,21 +187,11 @@ const Table: React.FC = () => {
     }
   };
 
-  if (loading) {
-      return <div className="text-center"><CircularProgress color="success"/></div>
-  }
-
-  if (error) {
-      return <div className="flex flex-col text-center p-8"><FiXCircle className="text-red-500"/> Error! Try refreshing the page.</div>
-  }
-
   return (
     <div className="w-full md:w-2/3 mt-23 px-4">
-
       <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Items Table</h1>
 
       <div className="flex flex-col sm:flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 w-full">
-
         <div className="flex flex-wrap gap-4 items-center">
           <div>
             <label className="text-green-800 font-medium mr-2">
@@ -231,7 +212,9 @@ const Table: React.FC = () => {
               <option value="Closed">Closed</option>
               <option value="Awaiting PreChecks">Awaiting PreChecks</option>
               <option value="Site Issues">Site Issues</option>
-              <option value="Additional Documents Required">Additional Documents Required</option>
+              <option value="Additional Documents Required">
+                Additional Documents Required
+              </option>
               <option value="New Quotes Required">New Quotes Required</option>
               <option value="Completed">Completed</option>
             </select>
@@ -259,8 +242,8 @@ const Table: React.FC = () => {
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
             }}
             className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
@@ -291,10 +274,14 @@ const Table: React.FC = () => {
                         {item.status} {getIcon(item.status ? item.status : "")}
                       </span>
                     </td>
-                    <td className="py-2 px-4 whitespace-nowrap">{item.value ? item.value : 0} $</td>
+                    <td className="py-2 px-4 whitespace-nowrap">
+                      {item.value ? item.value : 0} $
+                    </td>
                     <td className="py-2 px-4">
                       <div className="flex items-center justify-between">
-                        {item.createdAt ? item.createdAt.toLocaleDateString("en-UK") : ""}
+                        {item.createdAt
+                          ? item.createdAt.toLocaleDateString("en-UK")
+                          : ""}
                         <FiMoreHorizontal
                           className=" ml-3 text-green-800 cursor-pointer"
                           onClick={(e) => handleClick(e, item.itemName || "")}
@@ -335,7 +322,7 @@ const Table: React.FC = () => {
           Previous
         </button>
         <span className="text-green-800 font-medium">
-          Page {currentPage} of {totalPages===0? 1 : totalPages}
+          Page {currentPage} of {totalPages === 0 ? 1 : totalPages}
         </span>
         <button
           onClick={() =>
@@ -353,20 +340,40 @@ const Table: React.FC = () => {
           <div className="p-6">
             <h2 className="text-lg font-semibold">Delete Item</h2>
             <p>Are you sure you want to delete this item?</p>
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-center mt-4">
               <button
                 className="px-4 py-2 bg-gray-200 rounded mr-2 cursor-pointer hover:bg-gray-300 active:scale-95 transition"
                 onClick={handleDeleteDialogClose}
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 active:scale-95 transition">
+              <button
+                onClick={handleDeleteApp}
+                className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 active:scale-95 transition"
+              >
                 Delete
               </button>
             </div>
           </div>
         </Dialog>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={1500}
+        onClose={() => setSnackbarOpen(false)}
+        message={
+          <span style={{ color: "#fff" }}>App deleted successfully!</span>
+        }
+        ContentProps={{
+          sx: { backgroundColor: "rgb(9, 130, 54)" },
+        }}
+        action={
+          <FiX
+            className="text-white cursor-pointer"
+            onClick={() => setSnackbarOpen(false)}
+          />
+        }
+      />
     </div>
   );
 };

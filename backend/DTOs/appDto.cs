@@ -6,7 +6,7 @@ public class AppCreateDto
     public string? Status { get; set; }
     public string? Location { get; set; }
     public int? Value { get; set; }
-    public DateTime? CreateDt { get; set; }
+    public DateTime? CreatedAt { get; set; }
     public int getStatusId(string? status)
     {
         return status switch

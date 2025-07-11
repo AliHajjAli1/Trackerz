@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import { Dialog } from "@mui/material";
-import { FiPlusCircle } from "react-icons/fi";
+import { Dialog, Snackbar } from "@mui/material";
+import { FiPlusCircle, FiX } from "react-icons/fi";
 import { Link } from "react-router-dom"; 
+import { addApplication, type Application } from "../api/apps";
 
 interface NavbarProps {
   addAvailable?: boolean;
+  onAdd: (newApp: Application) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
+const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [status, setStatus] = useState("New");
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState<number | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [location, setLocation] = useState("");
 
   const getStatusId = (status: string): number => {
@@ -39,31 +42,37 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
     }
   };
 
-  const onAddSubmit = (e: React.FormEvent) => {
+  const onAddSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    interface NewItem {
-      name: string;
-      status: string;
-      value: string;
-      location: string;
-      Date: string;
-      statusId: number;
-    }
 
-    const newItem: NewItem = {
+    const newItem: Application = {
+      id: 0,
       name,
-      status,
       value,
       location,
-      Date: new Date().toISOString().split("T")[0] + "T00:00:00",
+      createdAt: new Date().toISOString().split("T")[0] + "T00:00:00",
       statusId: getStatusId(status),
+      startDate: null,
+      endDate: null,
+      status: status,
     };
+
+    
+
+    try {
+      const addedApp = await addApplication(newItem);
+      onAdd(addedApp ? addedApp : newItem);
+      console.log("Added app", addedApp);
+    } catch (err) {
+      console.error(err);
+    }
 
     console.log("Item Created:", newItem);
     setDialogOpen(false);
+    setSnackbarOpen(true);
     setName("");
     setStatus("New");
-    setValue("");
+    setValue(0);
     setLocation("");
   };
 
@@ -105,10 +114,7 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
             </p>
           </div>
 
-          <form
-            onSubmit={onAddSubmit}
-            className="flex flex-col space-y-4"
-          >
+          <form onSubmit={onAddSubmit} className="flex flex-col space-y-4">
             <input
               type="text"
               placeholder="Enter name"
@@ -121,8 +127,8 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
             <input
               type="text"
               placeholder="Enter value"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              value={value ? value.toString() : ""}
+              onChange={(e) => setValue(Number(e.target.value))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
               required
             />
@@ -163,7 +169,10 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
               <option className="text-green-800" value="Awaiting PreChecks">
                 Awaiting PreChecks
               </option>
-              <option className="text-green-800" value="Additional Documents Required">
+              <option
+                className="text-green-800"
+                value="Additional Documents Required"
+              >
                 Additional Documents Required
               </option>
               <option className="text-green-800" value="New Quotes Required">
@@ -189,6 +198,23 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable }) => {
           </form>
         </div>
       </Dialog>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={1500}
+        onClose={() => setSnackbarOpen(false)}
+        message={
+          <span style={{ color: "#fff" }}>App added successfully!</span>
+        }
+        ContentProps={{
+          sx: { backgroundColor: "rgb(9, 130, 54)" },
+        }}
+        action={
+          <FiX
+            className="text-white cursor-pointer"
+            onClick={() => setSnackbarOpen(false)}
+          />
+        }
+      />
     </nav>
   );
 };

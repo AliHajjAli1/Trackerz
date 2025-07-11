@@ -1,11 +1,5 @@
 import axios from 'axios';
 
-interface Inquiry {
-    title: string;
-    date: string;
-    description: string;
-}
-
 export type Application = {
   id: number;
   name: string | null;
@@ -15,7 +9,7 @@ export type Application = {
   location: string | null;
   startDate: string | null;
   endDate: string | null;
-  "inquiries-content"?: Inquiry[];
+  status?: string;
 };
 
 export const fetchApplications = async () => {
@@ -28,5 +22,40 @@ export const fetchApplications = async () => {
     }
     catch(error : any) {
         console.log("error message from API: ", error.message);
+    }
+};
+
+export const addApplication = async (application: Application) => {
+    try {
+        const response = await axios.post<Application>(
+            `http://localhost:5077/api/App`,
+            application
+        );
+        console.log("Added application:", response.data);
+        return response.data;
+    } catch (error: any) {
+        console.error("Error adding application:", error.message);
+    }
+};
+
+export const updateApplication = async (application: Application) => {
+    try {
+        const response = await axios.put<Application>(
+            `http://localhost:5077/api/App/${application.id}`,
+            application
+        );
+        console.log("Updated application:", response.data);
+        return response.data;
+    } catch (error: any) {
+        console.error("Error updating application:", error.message);
+    }
+};
+
+export const deleteApplication = async (id: number) => {
+    try {
+        await axios.delete(`http://localhost:5077/api/App/${id}`);
+        console.log("Deleted application with id:", id);
+    } catch (error: any) {
+        console.error("Error deleting application:", error.message);
     }
 };

@@ -127,7 +127,7 @@ const Edit = () => {
   if (loading) {
         return (
           <div className="min-h-screen flex flex-col">
-            <Navbar />
+            <Navbar onAdd={() => {}} />
             <main className="flex-grow flex items-center justify-center">
               <CircularProgress color="success" />
             </main>
@@ -139,7 +139,7 @@ const Edit = () => {
   if (error) {
         return (
           <div className="min-h-screen flex flex-col">
-            <Navbar />
+            <Navbar onAdd={() => {}}/>
             <main className="flex-grow flex items-center justify-center">
               <div className="flex flex-col text-center p-8">
                 <FiXCircle className="text-red-500" /> 
@@ -153,7 +153,7 @@ const Edit = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar onAdd={() => {}}/>
       <main className="flex-grow flex flex-col space-y-4 items-center justify-center">
         <div className="bg-white rounded-lg border-gray-200 border p-6 space-y-4 w-9/10 md:w-2/5 mt-30">
           <div className="text-center">

@@ -31,13 +31,14 @@ public class AppController : ControllerBase
             Status = application.Status,
             Location = application.Location,
             Value = application.Value,
-            CreatedAt = application.CreateDt,
+            CreatedAt = application.CreatedAt,
             StatusId = application.getStatusId(application.Status),
         };
 
         await _context.Application.AddAsync(newApp);
         await _context.SaveChangesAsync();
-        return Ok(application);
+        var savedApp = await _context.Application.FindAsync(newApp.Id);
+        return Ok(savedApp);
     }
 
     [HttpPut("{id}")]
