@@ -1,43 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
+using backend.Services;
 
 [ApiController]
     [Route("api/[controller]")]
     public class InquiriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IInquiryService _service;
 
-        public InquiriesController(AppDbContext context)
+        public InquiriesController(IInquiryService service)
         {
-            _context = context;
+            _service = service;
         }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Inquiry>>> GetAll()
+    public async Task<ActionResult> GetAll()
     {
-        var inquiries = await _context.Inquiries.ToListAsync();
+        var inquiries = await _service.GetAllAsync();
         return Ok(inquiries);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var app = await _service.GetByIdAsync(id);
+        if (app == null) return NotFound();
+        return Ok(app);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] InquiryCreateDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var inquiry = new Inquiry
-        {
-            ApplicationId = dto.ApplicationId,
-            Subject = dto.Subject,
-            InquiryText = dto.InquiryText,
-            AskedDt = dto.AskedDt
-        };
+        var created = await _service.CreateAsync(dto);
 
-        await _context.Inquiries.AddAsync(inquiry);
-        await _context.SaveChangesAsync();
-
-        return Ok(inquiry);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
 }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FiEdit2, FiMoreHorizontal, FiTrash, FiX} from "react-icons/fi";
-import { Menu, MenuItem, Divider, Dialog, Snackbar } from "@mui/material";
+import { FiEdit2, FiMoreHorizontal, FiTrash} from "react-icons/fi";
+import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
 import { deleteApplication, type Application } from "../api/apps";
 import { getStatus } from "../functions/getStatus";
 import { getIcon } from "../functions/getIcon";
+import { Snack } from "./Snack";
 
 interface Item {
   itemName: string | null;
@@ -69,6 +70,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
 
   const handleDeleteDialogClose = () => {
     setOpenDeleteDialog(false);
+    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -287,23 +289,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
           </div>
         </Dialog>
       )}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={1500}
-        onClose={() => setSnackbarOpen(false)}
-        message={
-          <span style={{ color: "#fff" }}>App deleted successfully!</span>
-        }
-        ContentProps={{
-          sx: { backgroundColor: "rgb(9, 130, 54)" },
-        }}
-        action={
-          <FiX
-            className="text-white cursor-pointer"
-            onClick={() => setSnackbarOpen(false)}
-          />
-        }
-      />
+      <Snack open={snackbarOpen} text="App deleted successfully!" setSnackOpen={setSnackbarOpen} />
     </div>
   );
 };

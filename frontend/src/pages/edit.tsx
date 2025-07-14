@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiX, FiXCircle } from "react-icons/fi";
-import { Dialog, CircularProgress, Snackbar, Skeleton } from "@mui/material";
+import { FiPlus, FiXCircle } from "react-icons/fi";
+import { Dialog, CircularProgress, Skeleton } from "@mui/material";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Inquiry from "../components/inquiry";
 import { fetchApplications, updateApplication, type Application } from "../api/apps";
 import { fetchInquiries, addInquiry, type Inquiries } from "../api/inquiries";
 import { getStatus, getStatusId } from "../functions/getStatus";
+import { Snack } from "../components/Snack";
 
 const Edit = () => {
   const [title, setTitle] = useState("");
@@ -363,23 +364,7 @@ const Edit = () => {
           </form>
         </div>
       </Dialog>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={1500}
-        onClose={() => setSnackbarOpen(false)}
-        message={
-          <span style={{ color: "#fff" }}>{snackBarText}</span>
-        }
-        ContentProps={{
-          sx: { backgroundColor: "rgb(9, 130, 54)" },
-        }}
-        action={
-          <FiX
-            className="text-white cursor-pointer"
-            onClick={() => setSnackbarOpen(false)}
-          />
-        }
-      />
+      <Snack open = {snackbarOpen} text={snackBarText} setSnackOpen={setSnackbarOpen}/>
     </div>
   );
 };

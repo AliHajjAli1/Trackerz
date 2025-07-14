@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Dialog, Snackbar } from "@mui/material";
-import { FiPlusCircle, FiX } from "react-icons/fi";
+import { Dialog } from "@mui/material";
+import { FiPlusCircle } from "react-icons/fi";
 import { Link } from "react-router-dom"; 
 import { addApplication, type Application } from "../api/apps";
 import { getStatusId } from "../functions/getStatus";
+import { Snack } from "./Snack";
 
 interface NavbarProps {
   addAvailable?: boolean;
@@ -183,23 +184,7 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
           </form>
         </div>
       </Dialog>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={1500}
-        onClose={() => setSnackbarOpen(false)}
-        message={
-          <span style={{ color: "#fff" }}>App added successfully!</span>
-        }
-        ContentProps={{
-          sx: { backgroundColor: "rgb(9, 130, 54)" },
-        }}
-        action={
-          <FiX
-            className="text-white cursor-pointer"
-            onClick={() => setSnackbarOpen(false)}
-          />
-        }
-      />
+      <Snack open={snackbarOpen} text="App created successfully!" setSnackOpen={setSnackbarOpen} />
     </nav>
   );
 };

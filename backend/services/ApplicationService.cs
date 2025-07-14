@@ -33,7 +33,7 @@ namespace backend.Services
         public async Task<AppCreateDto> GetByIdAsync(int id)
         {
             var app = await _context.Application.FindAsync(id);
-            if (app == null) return null;
+            if (app == null) return new AppCreateDto { };
 
             return new AppCreateDto
             {
