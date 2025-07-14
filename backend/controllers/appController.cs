@@ -1,72 +1,55 @@
 using Microsoft.AspNetCore.Mvc;
-using backend.Data;
+using backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AppController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IApplicationService _service;
 
-    public AppController(AppDbContext context)
+    public AppController(IApplicationService service)
     {
-        _context = context;
+        _service = service;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetApplications()
     {
-        var applications = await _context.Application.ToListAsync();
+        var applications = await _service.GetAllAsync();
         return Ok(applications);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var app = await _service.GetByIdAsync(id);
+        if (app == null) return NotFound();
+        return Ok(app);
+    }
+
     [HttpPost]
-    public async Task<IActionResult> AddApplication([FromBody] AppCreateDto application)
+    public async Task<IActionResult> Create([FromBody] AppCreateDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        var newApp = new Application
-        {
-            Name = application.Name,
-            Status = application.Status,
-            Location = application.Location,
-            Value = application.Value,
-            CreatedAt = application.CreatedAt,
-            StatusId = application.getStatusId(application.Status),
-        };
-
-        await _context.Application.AddAsync(newApp);
-        await _context.SaveChangesAsync();
-        var savedApp = await _context.Application.FindAsync(newApp.Id);
-        return Ok(savedApp);
+        var created = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateApplication(int id, [FromBody] Application application)
+    public async Task<IActionResult> Update(int id, [FromBody] AppCreateDto dto)
     {
-        if (id != application.Id)
-        {
-            return BadRequest("Application ID mismatch.");
-        }
-
-        _context.Entry(application).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return NoContent();
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var success = await _service.UpdateAsync(id, dto);
+        return success ? NoContent() : NotFound();
     }
-    
+
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteApplication(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var application = await _context.Application.FindAsync(id);
-        if (application == null)
-        {
-            return NotFound();
-        }
-
-        _context.Application.Remove(application);
-        await _context.SaveChangesAsync();
-        return NoContent();
+        var success = await _service.DeleteAsync(id);
+        return success ? NoContent() : NotFound();
     }
 
-    
+
 }

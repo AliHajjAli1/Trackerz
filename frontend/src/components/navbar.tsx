@@ -18,8 +18,6 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [location, setLocation] = useState("");
 
-  
-
   const cancelAdd = () => {
     setDialogOpen(false);
     setName("");
@@ -29,6 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
   };
 
   const onAddSubmit = async(e: React.FormEvent) => {
+    
     e.preventDefault();
 
     const newItem: Application = {

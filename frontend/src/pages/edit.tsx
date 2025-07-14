@@ -5,7 +5,7 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Inquiry from "../components/inquiry";
 import { fetchApplications, updateApplication, type Application } from "../api/apps";
-import { fetchInquiries, type Inquiries } from "../api/inquiries";
+import { fetchInquiries, addInquiry, type Inquiries } from "../api/inquiries";
 import { getStatus, getStatusId } from "../functions/getStatus";
 
 const Edit = () => {
@@ -59,15 +59,6 @@ const Edit = () => {
   useEffect(() => {
     setStatus(getStatus(selectedItem?.statusId || 1));
   }, [selectedItem]);
-
-  const submitInquiry = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSnackBarText("Inquiry added successfully!")
-    setSnackbarOpen(true);
-    setDialogOpen(false);
-    setTitle("");
-    setDescription("");
-  };
 
   const [inquiries, setInquiries] = useState<Inquiries[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(true);
@@ -129,6 +120,37 @@ const Edit = () => {
       console.error(error);
     }
   }
+
+  const refreshInqs = ( inquiry: Inquiries) => {
+    setInquiries((prev)=>[...prev, inquiry])
+  }
+
+  const addNewInquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const newInquiry: Inquiries = {
+      id: 0,
+      subject: title,
+      inquiryText: description,
+      askedDt: new Date().toISOString().split("T")[0] + "T00:00:00",
+      applicationId: selectedItem?.id || 0,
+    };
+
+    try {
+      const addedInquiry = await addInquiry(newInquiry);
+      console.log("Added inquiry", addedInquiry);
+    } catch (err) {
+      console.error(err);
+    }
+
+    console.log("Inquiry Created:", newInquiry);
+    setSnackBarText("Inquiry added successfully!")
+    refreshInqs(newInquiry);
+    setSnackbarOpen(true);
+    setDialogOpen(false);
+    setTitle("");
+    setDescription("");
+  };
 
   if (loading) {
     return (
@@ -304,7 +326,7 @@ const Edit = () => {
             </p>
           </div>
 
-          <form onSubmit={submitInquiry} className="flex flex-col space-y-4">
+          <form onSubmit={addNewInquiry} className="flex flex-col space-y-4">
             <input
               type="text"
               placeholder="Title"
