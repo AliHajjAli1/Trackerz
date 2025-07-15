@@ -24,7 +24,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [items, setItems] = useState<Item[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [sortBy, setSortBy] = useState<"name" | "date">("date");
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "date-newest" | "date-oldest">("date-newest");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
@@ -84,31 +84,45 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
 
   const filteredItems = useMemo(() => {
     return items
-      .filter(item =>
-        (statusFilter === "All" || item.status === statusFilter) &&
-        item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+      .filter(
+        (item) =>
+          (statusFilter === "All" || item.status === statusFilter) &&
+          item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
-        if (sortBy === "name") {
-          const aName = a.itemName || "";
-          const bName = b.itemName || "";
+        const aName = a.itemName || "";
+        const bName = b.itemName || "";
 
-          const aStartsWithLetter = /^[a-zA-Z]/.test(aName);
-          const bStartsWithLetter = /^[a-zA-Z]/.test(bName);
+        const aStartsWithLetter = /^[a-zA-Z]/.test(aName);
+        const bStartsWithLetter = /^[a-zA-Z]/.test(bName);
 
-          if (aStartsWithLetter && !bStartsWithLetter) {
-            return -1;
-          }
-          if (!aStartsWithLetter && bStartsWithLetter) {
-            return 1;
-          }
-          
-          return aName.localeCompare(bName, 'en', { numeric: true, sensitivity: 'base' });
+        switch (sortBy) {
+          case "name-asc":
+            if (aStartsWithLetter && !bStartsWithLetter) return -1;
+            if (!aStartsWithLetter && bStartsWithLetter) return 1;
+            return aName.localeCompare(bName, "en", {
+              numeric: true,
+              sensitivity: "base",
+            });
 
-        } else {
-          if (!a.createdAt) return 1;
-          if (!b.createdAt) return -1;
-          return b.createdAt.getTime() - a.createdAt.getTime();
+          case "name-desc":
+            if (aStartsWithLetter && !bStartsWithLetter) return 1;
+            if (!aStartsWithLetter && bStartsWithLetter) return -1;
+            return bName.localeCompare(aName, "en", {
+              numeric: true,
+              sensitivity: "base",
+            });
+
+          case "date-oldest":
+            if (!a.createdAt) return 1;
+            if (!b.createdAt) return -1;
+            return a.createdAt.getTime() - b.createdAt.getTime();
+
+          case "date-newest":
+          default:
+            if (!a.createdAt) return 1;
+            if (!b.createdAt) return -1;
+            return b.createdAt.getTime() - a.createdAt.getTime();
         }
       });
   }, [items, statusFilter, searchTerm, sortBy]);
@@ -157,13 +171,15 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
             <select
               value={sortBy}
               onChange={(e) => {
-                setSortBy(e.target.value as "name" | "date");
+                setSortBy(e.target.value as | "name-asc" | "name-desc" | "date-newest" | "date-oldest");
                 setCurrentPage(1);
               }}
               className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
             >
-              <option value="date"> Creation Date (Newest)</option>
-              <option value="name">Name (A–Z)</option>
+              <option value="date-newest">Newest – Oldest</option>
+              <option value="date-oldest">Oldest – Newest</option>
+              <option value="name-asc">Name (A–Z)</option>
+              <option value="name-desc">Name (Z–A)</option>
             </select>
           </div>
         </div>
@@ -171,6 +187,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
         <div>
           <input
             type="search"
+            spellCheck={true}
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => {
@@ -211,9 +228,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex items-center justify-between">
-                        {item.createdAt
-                          ? item.createdAt.toLocaleDateString("en-UK")
-                          : ""}
+                        {item.createdAt ? item.createdAt.toLocaleDateString("en-UK"): ""}
                         <FiMoreHorizontal
                           className=" ml-3 text-green-800 cursor-pointer"
                           onClick={(e) => handleClick(e, item.itemName || "")}
@@ -249,7 +264,8 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-[#f39f6b] text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-600 active:scale-95 transition"
+          className={`px-4 py-2 bg-[#f39f6b] text-white rounded active:scale-95 transition
+            ${currentPage === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-orange-600"}`}
         >
           Previous
         </button>
@@ -257,11 +273,10 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
           Page {currentPage} of {totalPages === 0 ? 1 : totalPages}
         </span>
         <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-[#f39f6b] text-white rounded cursor-pointer disabled:opacity-50 hover:bg-orange-600 active:scale-95 transition"
+          className={`px-4 py-2 bg-[#f39f6b] text-white rounded active:scale-95 transition
+            ${currentPage === totalPages ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-orange-600"}`}
         >
           Next
         </button>

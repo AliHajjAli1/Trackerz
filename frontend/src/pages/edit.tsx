@@ -202,11 +202,11 @@ const Edit = () => {
               type="text"
               placeholder="Enter name"
               value={name}
+              spellCheck={true}
               onChange={(e) => setName(e.target.value)}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
               required
             />
-
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -225,28 +225,22 @@ const Edit = () => {
               <option value="New Quotes Required">New Quotes Required</option>
               <option value="Completed">Completed</option>
             </select>
-            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+            <label className="border border-gray-300 rounded-md px-4 py-2 text-gray-400 cursor-not-allowed">
               Location: {selectedItem ? selectedItem.location : "N/A"}
             </label>
-            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+            <label className="border border-gray-300 rounded-md px-4 py-2 text-gray-400 cursor-not-allowed">
               Open Date:{" "}
-              {new Date(selectedItem?.createdAt || "").toLocaleDateString(
-                "en-UK"
-              )}
+              {new Date(selectedItem?.createdAt || "").toLocaleDateString("en-UK")}
             </label>
-            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+            <label className="border border-gray-300 rounded-md px-4 py-2 text-gray-400 cursor-not-allowed">
               Start Date:{" "}
-              {new Date(selectedItem?.startDate || "").toLocaleDateString(
-                "en-UK"
-              )}
+              {new Date(selectedItem?.startDate || "").toLocaleDateString("en-UK")}
             </label>
-            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+            <label className="border border-gray-300 rounded-md px-4 py-2 text-gray-400 cursor-not-allowed">
               End Date:{" "}
-              {new Date(selectedItem?.endDate || "").toLocaleDateString(
-                "en-UK"
-              )}
+              {new Date(selectedItem?.endDate || "").toLocaleDateString("en-UK")}
             </label>
-            <label className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150">
+            <label className="border border-gray-300 rounded-md px-4 py-2 text-gray-400 cursor-not-allowed">
               Value: {selectedItem ? selectedItem.value : "N/A"}
             </label>
             <div className="flex justify-center space-x-16 pt-2">
@@ -307,7 +301,7 @@ const Edit = () => {
       <Footer />
       <button
         onClick={() => setDialogOpen(true)}
-        className="fixed bottom-6 right-6 bg-orange-600 hover:bg-orange-500 text-white p-4 rounded-full shadow-lg focus:outline-none active:scale-95 transition-transform z-50"
+        className="fixed bottom-6 right-6 bg-orange-600 cursor-pointer hover:bg-orange-500 text-white p-4 rounded-full shadow-lg focus:outline-none active:scale-95 transition-transform z-50"
       >
         <FiPlus className="text-2xl" />
       </button>
@@ -330,6 +324,7 @@ const Edit = () => {
           <form onSubmit={addNewInquiry} className="flex flex-col space-y-4">
             <input
               type="text"
+              spellCheck={true}
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -340,6 +335,7 @@ const Edit = () => {
             <input
               type="text"
               placeholder="Description"
+              spellCheck={true}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-150"
@@ -364,7 +360,7 @@ const Edit = () => {
           </form>
         </div>
       </Dialog>
-      <Snack open = {snackbarOpen} text={snackBarText} setSnackOpen={setSnackbarOpen}/>
+      <Snack open = {snackbarOpen} text={snackBarText} setSnackOpen={setSnackbarOpen} />
     </div>
   );
 };
