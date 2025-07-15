@@ -43,13 +43,12 @@ const Navbar: React.FC<NavbarProps> = ({ addAvailable, onAdd }) => {
       status: status,
     };
 
-    
-
     try {
       const addedApp = await addApplication(newItem);
       onAdd(addedApp ? addedApp : newItem);
       console.log("Added app", addedApp);
-    } catch (err) {
+    } 
+    catch (err) {
       console.error(err);
     }
 

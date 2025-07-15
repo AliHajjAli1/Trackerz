@@ -26,16 +26,18 @@ const Home = () => {
         const response = await fetchApplications();
         if (response && response.data) {
           setApplications(response.data);
-        } else {
+        } 
+        else {
           setApplications([]);
         }
-      } catch (err) {
+      } 
+      catch (err) {
         setError('Failed to fetch applications');
-      } finally {
+      } 
+      finally {
         setLoading(false);
       }
     };
-
     loadApplications();
   }, []);
 
@@ -57,8 +59,8 @@ const Home = () => {
         <Navbar onAdd={() => {}} />
         <main className="flex-grow flex items-center justify-center">
           <div className="flex flex-col text-center p-8">
-            <FiXCircle className="text-red-500" /> Error! Try refreshing the
-            page.
+            <FiXCircle className="text-red-500" /> 
+            Error! Try refreshing the page.
           </div>
         </main>
         <Footer />

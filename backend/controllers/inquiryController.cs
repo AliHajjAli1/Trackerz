@@ -1,18 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using backend.Data;
-using Microsoft.EntityFrameworkCore;
 using backend.Services;
 
 [ApiController]
-    [Route("api/[controller]")]
-    public class InquiriesController : ControllerBase
-    {
-        private readonly IInquiryService _service;
+[Route("api/[controller]")]
+public class InquiriesController : ControllerBase
+{
+    private readonly IInquiryService _service;
 
-        public InquiriesController(IInquiryService service)
-        {
-            _service = service;
-        }
+    public InquiriesController(IInquiryService service)
+    {
+        _service = service;
+    }
 
     [HttpGet]
     public async Task<ActionResult> GetAll()

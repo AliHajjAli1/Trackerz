@@ -71,12 +71,15 @@ const Edit = () => {
         const response = await fetchInquiries();
         if (response && response.data) {
           setInquiries(response.data);
-        } else {
+        } 
+        else {
           setInquiries([]);
         }
-      } catch (err) {
+      } 
+      catch (err) {
         setInquiriesError("Failed to fetch inquiries");
-      } finally {
+      } 
+      finally {
         setInquiriesLoading(false);
       }
     };

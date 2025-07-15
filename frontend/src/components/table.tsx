@@ -169,7 +169,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
 
   return (
     <div className="w-full md:w-2/3 mt-23 px-4">
-      <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Items Table</h1>
+      <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Applications Table</h1>
       <Filter filterValue={statusFilter} filterOnChange={handleFilter} sortValue={sortBy}
        sortOnChange={handleSort} searchValue={searchTerm} searchOnChange={handleSearch}/>
       <div className="w-full overflow-x-auto">
