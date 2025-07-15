@@ -5,6 +5,7 @@ import { deleteApplication, type Application } from "../api/apps";
 import { getStatus } from "../functions/getStatus";
 import { getIcon } from "../functions/getIcon";
 import { Snack } from "./Snack";
+import { Filter } from "./filter";
 
 interface Item {
   itemName: string | null;
@@ -74,13 +75,29 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
     setAnchorEl(null);
   };
 
+  const handleFilter = (str: string) => {
+    setStatusFilter(str);
+    setCurrentPage(1);
+  }
+
+  const handleSort = (str: string) => {
+    setSortBy(str as | "name-asc" | "name-desc" | "date-newest" | "date-oldest");
+    setCurrentPage(1);
+  }
+
   const handleSearch = (str: string) => {
     setSearchTerm(str);
     if (str.startsWith("@")) {
-      const num = parseInt(str.slice(1), 10);
-      if (!isNaN(num)) {
+      const afterAt = str.slice(1);
+      const num = Number(afterAt);
+      if (!isNaN(num) && Number.isInteger(num)) {
         const clampedPage = Math.max(1, Math.min(num, totalPages || 1));
         setCurrentPage(clampedPage);
+        setSearchQuery("");
+      } 
+      else {
+        setSearchQuery(str);
+        setCurrentPage(1);
       }
     } 
     else {
@@ -153,71 +170,8 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
   return (
     <div className="w-full md:w-2/3 mt-23 px-4">
       <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Items Table</h1>
-      <div className="flex flex-col sm:flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 w-full">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-          <div className="flex items-center w-full md:w-auto">
-            <label className="text-green-800 font-medium mr-2">Filter:</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-            >
-              <option value="All">All</option>
-              <option value="New">New</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Approved">Approved</option>
-              <option value="Closed">Closed</option>
-              <option value="Awaiting PreChecks">Awaiting PreChecks</option>
-              <option value="Site Issues">Site Issues</option>
-              <option value="Additional Documents Required">
-                Additional Documents Required
-              </option>
-              <option value="New Quotes Required">New Quotes Required</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-
-          <div className="flex items-center w-full md:w-auto">
-            <label className="text-green-800 font-medium mr-2">Sort:</label>
-            <select
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(
-                  e.target.value as
-                    | "name-asc"
-                    | "name-desc"
-                    | "date-newest"
-                    | "date-oldest"
-                );
-                setCurrentPage(1);
-              }}
-              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-            >
-              <option value="date-newest">Newest – Oldest</option>
-              <option value="date-oldest">Oldest – Newest</option>
-              <option value="name-asc">Name (A–Z)</option>
-              <option value="name-desc">Name (Z–A)</option>
-            </select>
-          </div>
-          <div className="flex items-center w-full md:w-auto">
-            <label className="text-green-800 font-medium mr-2">Search:</label>
-            <input
-              type="search"
-              spellCheck={true}
-              placeholder="Search or write @Page number"
-              value={searchTerm}
-              onChange={(e) => {
-                handleSearch(e.target.value);
-              }}
-              className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-lg md:placeholder:text-xs"
-            />
-          </div>
-        </div>
-      </div>
-
+      <Filter filterValue={statusFilter} filterOnChange={handleFilter} sortValue={sortBy}
+       sortOnChange={handleSort} searchValue={searchTerm} searchOnChange={handleSearch}/>
       <div className="w-full overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden border border-orange-200 rounded-lg">
@@ -247,9 +201,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex items-center justify-between">
-                        {item.createdAt
-                          ? item.createdAt.toLocaleDateString("en-UK")
-                          : ""}
+                        {item.createdAt ? item.createdAt.toLocaleDateString("en-UK") : ""}
                         <FiMoreHorizontal
                           className=" ml-3 text-green-800 cursor-pointer"
                           onClick={(e) => handleClick(e, item.itemName || "")}

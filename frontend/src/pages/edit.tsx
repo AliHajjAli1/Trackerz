@@ -219,9 +219,7 @@ const Edit = () => {
               <option value="Closed">Closed</option>
               <option value="Awaiting PreChecks">Awaiting PreChecks</option>
               <option value="Site Issues">Site Issues</option>
-              <option value="Additional Documents Required">
-                Additional Documents Required
-              </option>
+              <option value="Additional Documents Required">Additional Documents Required</option>
               <option value="New Quotes Required">New Quotes Required</option>
               <option value="Completed">Completed</option>
             </select>
