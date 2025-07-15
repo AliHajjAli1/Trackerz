@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FiEdit2, FiMoreHorizontal, FiTrash} from "react-icons/fi";
+import { FiEdit2, FiMoreHorizontal, FiTrash } from "react-icons/fi";
 import { Menu, MenuItem, Divider, Dialog } from "@mui/material";
 import { deleteApplication, type Application } from "../api/apps";
 import { getStatus } from "../functions/getStatus";
@@ -26,6 +26,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "date-newest" | "date-oldest">("date-newest");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -73,6 +74,21 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
     setAnchorEl(null);
   };
 
+  const handleSearch = (str: string) => {
+    setSearchTerm(str);
+    if (str.startsWith("@")) {
+      const num = parseInt(str.slice(1), 10);
+      if (!isNaN(num)) {
+        const clampedPage = Math.max(1, Math.min(num, totalPages || 1));
+        setCurrentPage(clampedPage);
+      }
+    } 
+    else {
+      setSearchQuery(str);
+      setCurrentPage(1);
+    }
+  };
+
   useEffect(() => {
     setItems(applications.map((app) => ({
       itemName: app.name,
@@ -87,7 +103,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
       .filter(
         (item) =>
           (statusFilter === "All" || item.status === statusFilter) &&
-          item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+          item.itemName?.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .sort((a, b) => {
         const aName = a.itemName || "";
@@ -125,7 +141,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
             return b.createdAt.getTime() - a.createdAt.getTime();
         }
       });
-  }, [items, statusFilter, searchTerm, sortBy]);
+  }, [items, statusFilter, searchQuery, sortBy]);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedItems = filteredItems.slice(
@@ -138,18 +154,16 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
     <div className="w-full md:w-2/3 mt-23 px-4">
       <h1 className="text-2xl font-bold text-[#f39f6b] mb-4">Items Table</h1>
       <div className="flex flex-col sm:flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 w-full">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div>
-            <label className="text-green-800 font-medium mr-2">
-              Filter by Status:
-            </label>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+          <div className="flex items-center w-full md:w-auto">
+            <label className="text-green-800 font-medium mr-2">Filter:</label>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
             >
               <option value="All">All</option>
               <option value="New">New</option>
@@ -166,15 +180,21 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
             </select>
           </div>
 
-          <div>
-            <label className="text-green-800 font-medium mr-2">Sort by:</label>
+          <div className="flex items-center w-full md:w-auto">
+            <label className="text-green-800 font-medium mr-2">Sort:</label>
             <select
               value={sortBy}
               onChange={(e) => {
-                setSortBy(e.target.value as | "name-asc" | "name-desc" | "date-newest" | "date-oldest");
+                setSortBy(
+                  e.target.value as
+                    | "name-asc"
+                    | "name-desc"
+                    | "date-newest"
+                    | "date-oldest"
+                );
                 setCurrentPage(1);
               }}
-              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="p-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
             >
               <option value="date-newest">Newest – Oldest</option>
               <option value="date-oldest">Oldest – Newest</option>
@@ -182,20 +202,19 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
               <option value="name-desc">Name (Z–A)</option>
             </select>
           </div>
-        </div>
-
-        <div>
-          <input
-            type="search"
-            spellCheck={true}
-            placeholder="Search by name..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-          />
+          <div className="flex items-center w-full md:w-auto">
+            <label className="text-green-800 font-medium mr-2">Search:</label>
+            <input
+              type="search"
+              spellCheck={true}
+              placeholder="Search or write @Page number"
+              value={searchTerm}
+              onChange={(e) => {
+                handleSearch(e.target.value);
+              }}
+              className="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder:text-lg md:placeholder:text-xs"
+            />
+          </div>
         </div>
       </div>
 
@@ -228,7 +247,9 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex items-center justify-between">
-                        {item.createdAt ? item.createdAt.toLocaleDateString("en-UK"): ""}
+                        {item.createdAt
+                          ? item.createdAt.toLocaleDateString("en-UK")
+                          : ""}
                         <FiMoreHorizontal
                           className=" ml-3 text-green-800 cursor-pointer"
                           onClick={(e) => handleClick(e, item.itemName || "")}
@@ -247,7 +268,7 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
                           </MenuItem>
                           <Divider />
                           <MenuItem onClick={handleDeleteClick}>
-                            Delete <FiTrash className="ml-2 " />
+                            Delete <FiTrash className="ml-2" />
                           </MenuItem>
                         </Menu>
                       </div>
@@ -304,7 +325,11 @@ const Table: React.FC<Props> = ({ applications, onDelete }) => {
           </div>
         </Dialog>
       )}
-      <Snack open={snackbarOpen} text="App deleted successfully!" setSnackOpen={setSnackbarOpen} />
+      <Snack
+        open={snackbarOpen}
+        text="App deleted successfully!"
+        setSnackOpen={setSnackbarOpen}
+      />
     </div>
   );
 };
